@@ -27,3 +27,29 @@ It doesn’t touch your project scope or anything else from the RC file.
    ```bash
    chmod +x os
    ```
+
+## Caution
+
+In its current form, don't rely on `--os-cloud` with this wrapper.
+
+**Details:**
+
+- The wrapper's token fetch runs:
+
+   ```
+   openstack token issue -f shell
+   ```
+   with whatever `OS_*` is in your environment (or RC), but does not propagate `--os-cloud` freom your final command into that token-issue call.
+
+- If you run:
+   ```
+   os --os-cloud foo server list
+   ```
+   then
+   - `openstack token issue` (inside the wrapper) will still use env / RC, not `--os-cloud foo`.
+   - `openstack --os-cloud foo server list` (outside, the final call) will try to use cached token PLUS the `foo` cloud config.
+   - If your env/RC and `foo` don't match you will get...wierdness or failures.
+
+   This wrapper forces `OS_AUTH_TYPE=token` and `OS_TOKEN`, which will override the auth type coming from `cloud.yaml`. It **could** work, but only if the token was issued for the same cloud and scope.
+
+   You have been warned.
