@@ -39,7 +39,7 @@ In its current form, don't rely on `--os-cloud` with this wrapper.
    ```
    openstack token issue -f shell
    ```
-   with whatever `OS_*` is in your environment (or RC), but does not propagate `--os-cloud` freom your final command into that token-issue call.
+   with whatever `OS_*` is in your environment (or RC), but does not propagate `--os-cloud` from your final command into that token-issue call.
 
 - If you run:
    ```
