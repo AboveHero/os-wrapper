@@ -12,13 +12,24 @@ EXPIRY_FILE="$CACHE_DIR/token_expires"
 # Refresh a bit before actual expiry (seconds)
 SAFETY_MARGIN=60
 
-# Load v3 RC
-if [[ -f "$RC_FILE" ]]; then
-    # shellcheck disable=SC1090
-    source "$RC_FILE"
-else
-    echo "RC file not found: $RC_FILE" >&2
-    exit 1
+# Check if credentials are already defined
+have_env_creds=0
+if [[ -n "${OS_AUTH_URL:-}" && -n "${OS_USERNAME:-}" && -n "${OS_PASSWORD:-}" ]]; then
+    if [[ -n "${OS_PROJECT_ID:-}" || -n "${OS_PROJECT_NAME:-}" ]]; then
+        have_env_creds=1
+    fi
+fi
+
+# If credentials not defined, source them, if not possible, exit with error
+if [[ $have_env_creds -eq 0 ]]; then
+    if [[ -f "$RC_FILE" ]]; then
+        # shellcheck disable=SC1090
+        source "$RC_FILE"
+    else
+        echo "No suitable OpenStack credentials in env, and RC file not found: $RC_FILE" >&2
+        echo "Either export OS_AUTH_URL/OS_USERNAME/OS_PASSWORD/OS_PROJECT_* or set OS_RC_FILE." >&2
+        exit 1
+    fi
 fi
 
 # Ensure Keystone URL ends with /v3
