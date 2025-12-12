@@ -10,6 +10,7 @@ Basically: same CLI, same output, but without spamming Keystone for every comman
 ## What it does
 
 - Loads your existing RC file (v3 only).
+  - Alternatively, if `OS_*` credentials are already defined, uses those.
 - Checks if a cached token exists and is still valid.
 - If not valid, gets a new token once.
 - Exports `OS_AUTH_TYPE=token` and `OS_TOKEN=<cached token>`.
@@ -21,6 +22,8 @@ It doesn’t touch your project scope or anything else from the RC file.
 ## Usage
 
 1. Put `os.sh` somewhere in your `$PATH`.
+   1. For example `sudo cp os.sh /usr/local/bin/os`
 2. Make it executable:
    ```bash
-   chmod +x os-wrapper.sh
+   chmod +x os
+   ```
