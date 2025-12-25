@@ -17,6 +17,9 @@ Basically: same CLI, same output, but without spamming Keystone for every comman
 - Runs the `openstack` CLI normally.
 - That’s it.
 
+Tokens are cached per identity (auth URL + user + project/domain) under `~/.cache/openstack/<hash>/`.
+Switching RC files yields a different cache key so a token issued for one context will never be reused for another.
+
 It doesn’t touch your project scope or anything else from the RC file.
 
 ## Usage

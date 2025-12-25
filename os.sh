@@ -3,11 +3,8 @@ set -euo pipefail
 
 RC_FILE="${OS_RC_FILE:-$HOME/openrc}"
 
-# Cache directory
-CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/openstack"
-mkdir -p "$CACHE_DIR"
-TOKEN_FILE="$CACHE_DIR/token"
-EXPIRY_FILE="$CACHE_DIR/token_expires"
+# Cache root (per identity subfolders are created later)
+CACHE_ROOT="${XDG_CACHE_HOME:-$HOME/.cache}/openstack"
 
 # Refresh a bit before actual expiry (seconds)
 SAFETY_MARGIN=60
@@ -37,6 +34,26 @@ if [[ "${OS_AUTH_URL}" != *"/v3" && "${OS_AUTH_URL}" != *"/v3/" ]]; then
     OS_AUTH_URL="${OS_AUTH_URL%/}/v3"
     export OS_AUTH_URL
 fi
+
+cache_key() {
+    printf '%s\0' \
+        "${OS_AUTH_URL:-}" \
+        "${OS_USERNAME:-}" \
+        "${OS_USER_DOMAIN_NAME:-}" \
+        "${OS_USER_DOMAIN_ID:-}" \
+        "${OS_PROJECT_ID:-}" \
+        "${OS_PROJECT_NAME:-}" \
+        "${OS_PROJECT_DOMAIN_NAME:-}" \
+        "${OS_PROJECT_DOMAIN_ID:-}" \
+        "${OS_DOMAIN_ID:-}" \
+        "${OS_DOMAIN_NAME:-}"
+}
+
+CACHE_KEY=$(cache_key | sha256sum | awk '{print $1}')
+CACHE_DIR="${CACHE_ROOT}/${CACHE_KEY}"
+mkdir -p "$CACHE_DIR"
+TOKEN_FILE="$CACHE_DIR/token"
+EXPIRY_FILE="$CACHE_DIR/token_expires"
 
 get_new_token() {
     # Make sure we use normal password/appcred auth for this call
